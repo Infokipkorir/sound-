@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sound – News & Blog Platform</title>
+<meta name="description" content="Sound – Your trusted source for breaking news, analysis, and insights.">
+<meta property="og:title" content="Sound News">
+<meta property="og:description" content="Breaking news and in-depth analysis">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0d0d0e;--paper:#faf9f6;--cream:#f2efe8;--red:#c0392b;--red-dark:#922b21;
+  --gold:#b8860b;--muted:#6b6760;--border:#e0ddd5;--white:#fff;
+  --sidebar-w:280px;--header-h:64px;
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--paper);color:var(--ink);font-size:16px;line-height:1.6}
+
+/* ── ANTI-AD-BLOCK OVERLAY ── */
+#adblock-wall{display:none;position:fixed;inset:0;z-index:99999;background:rgba(13,13,14,.92);backdrop-filter:blur(6px);align-items:center;justify-content:center}
+#adblock-wall.show{display:flex}
+.adblock-box{background:var(--white);max-width:480px;width:90%;border-radius:4px;padding:40px;text-align:center}
+.adblock-box h2{font-family:var(--font-display);font-size:26px;margin-bottom:12px}
+.adblock-box p{color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:24px}
+.adblock-box .btn-allow{background:var(--red);color:#fff;border:none;padding:12px 32px;font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;border-radius:2px;letter-spacing:.5px}
+.adblock-box .btn-allow:hover{background:var(--red-dark)}
+.adblock-box .btn-sub{display:block;margin-top:12px;font-size:13px;color:var(--muted);text-decoration:underline;cursor:pointer}
+
+/* ── BREAKING NEWS TICKER ── */
+.breaking-bar{background:var(--red);color:#fff;display:flex;align-items:center;overflow:hidden;height:36px;position:sticky;top:0;z-index:200}
+.breaking-label{background:var(--ink);color:#fff;font-size:11px;font-weight:600;letter-spacing:1.5px;padding:0 16px;height:100%;display:flex;align-items:center;white-space:nowrap;flex-shrink:0;text-transform:uppercase}
+.ticker-wrap{flex:1;overflow:hidden;position:relative}
+.ticker{display:flex;animation:ticker 40s linear infinite;white-space:nowrap}
+.ticker:hover{animation-play-state:paused}
+.ticker-item{font-size:13px;padding:0 32px;font-weight:500}
+.ticker-sep{opacity:.5;margin-right:8px}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── HEADER ── */
+header{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:36px;z-index:190;height:var(--header-h)}
+.header-inner{max-width:1440px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:20px;height:100%}
+.logo{font-family:var(--font-display);font-size:34px;font-weight:900;color:var(--ink);letter-spacing:-1px;text-decoration:none;flex-shrink:0}
+.logo span{color:var(--red)}
+.nav-main{display:flex;gap:4px;flex:1;overflow:hidden}
+.nav-main a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:2px;white-space:nowrap;transition:color .15s,background .15s}
+.nav-main a:hover,.nav-main a.active{color:var(--ink);background:var(--cream)}
+.header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.btn{font-family:var(--font-body);cursor:pointer;border:none;border-radius:2px;font-size:13px;font-weight:600;padding:8px 18px;transition:all .15s;letter-spacing:.3px}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--ink)}
+.btn-outline:hover{border-color:var(--ink);background:var(--cream)}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{background:var(--red-dark)}
+.search-btn{width:36px;height:36px;border-radius:50%;background:var(--cream);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.search-btn svg{width:16px;height:16px}
+
+/* ── LAYOUT ── */
+.site-wrap{max-width:1440px;margin:0 auto;padding:0 24px}
+.two-col{display:grid;grid-template-columns:1fr var(--sidebar-w);gap:32px;padding:32px 0}
+@media(max-width:1024px){.two-col{grid-template-columns:1fr}.sidebar{display:none}}
+
+/* ── AD UNITS ── */
+.ad-unit{background:var(--cream);border:1.5px dashed var(--border);border-radius:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;position:relative;overflow:hidden;font-size:11px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+.ad-unit::before{content:'Advertisement';position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);opacity:.6}
+.ad-unit .ad-provider{font-size:12px;font-weight:600;color:var(--muted);margin-top:16px}
+.ad-leaderboard{width:100%;height:90px}
+.ad-rectangle{width:100%;height:250px;margin-bottom:24px}
+.ad-half{width:100%;height:120px;margin-bottom:16px}
+
+/* ── HERO / FEATURED ── */
+.hero-grid{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:auto auto;gap:2px;border-radius:2px;overflow:hidden;margin-bottom:32px}
+.hero-main{grid-row:1/3;position:relative;min-height:480px;cursor:pointer}
+.hero-side{position:relative;min-height:235px;cursor:pointer}
+.hero-img{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;transition:transform .4s ease}
+.hero-main:hover .hero-img,.hero-side:hover .hero-img{transform:scale(1.03)}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(13,13,14,.85) 0%,transparent 55%)}
+.hero-content{position:absolute;bottom:0;left:0;right:0;padding:24px}
+.hero-cat{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--red);background:rgba(255,255,255,.12);backdrop-filter:blur(4px);padding:3px 8px;border-radius:2px;display:inline-block;margin-bottom:8px}
+.hero-title{font-family:var(--font-display);color:#fff;line-height:1.2}
+.hero-main .hero-title{font-size:clamp(22px,2.5vw,32px)}
+.hero-side .hero-title{font-size:16px}
+.hero-meta{font-size:12px;color:rgba(255,255,255,.65);margin-top:6px}
+
+/* ── ARTICLE CARDS ── */
+.section-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--red);border-bottom:2px solid var(--red);padding-bottom:6px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between}
+.section-label a{font-size:11px;font-weight:500;color:var(--muted);text-decoration:none;letter-spacing:0;text-transform:none}
+.section-label a:hover{color:var(--ink)}
+
+.article-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px;margin-bottom:32px}
+.article-card{cursor:pointer;border-bottom:1px solid var(--border);padding-bottom:20px}
+.article-card:hover .card-title{text-decoration:underline}
+.card-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:2px;margin-bottom:12px;transition:opacity .2s}
+.article-card:hover .card-thumb{opacity:.9}
+.card-cat{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);margin-bottom:5px}
+.card-title{font-family:var(--font-display);font-size:18px;line-height:1.25;margin-bottom:8px}
+.card-excerpt{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.card-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--muted)}
+.card-meta .read-time{font-variant-numeric:tabular-nums}
+
+/* ── SIDEBAR ── */
+.sidebar{display:flex;flex-direction:column;gap:24px}
+.sidebar-block{border-top:2px solid var(--ink);padding-top:16px}
+.sidebar-block h3{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+.sidebar-list li{list-style:none;border-bottom:1px solid var(--border);padding:10px 0}
+.sidebar-list li:last-child{border:none}
+.sidebar-list .num{font-family:var(--font-mono);font-size:18px;font-weight:500;color:var(--border);margin-right:10px;flex-shrink:0}
+.sidebar-item{display:flex;align-items:flex-start;gap:8px;cursor:pointer}
+.sidebar-item:hover .si-title{text-decoration:underline}
+.si-title{font-size:13px;font-weight:500;line-height:1.4}
+.si-meta{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── WRITER BADGE ── */
+.writer-card{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.writer-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--cream)}
+.writer-name{font-size:13px;font-weight:600}
+.writer-beat{font-size:11px;color:var(--muted)}
+.writer-posts{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-left:auto}
+
+/* ── SHARE BAR ── */
+.share-bar{display:flex;align-items:center;gap:8px;padding:16px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin:24px 0}
+.share-label{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.share-btn{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.share-btn:hover{background:var(--ink);border-color:var(--ink)}
+.share-btn:hover svg{stroke:#fff;fill:#fff}
+.share-btn svg{width:16px;height:16px;stroke:var(--ink);fill:none;stroke-width:1.8}
+.share-btn.share-copy{margin-left:auto}
+.share-copy-msg{font-size:12px;color:var(--red);display:none}
+.share-copy-msg.show{display:inline}
+
+/* ── ADMIN PANEL ── */
+#admin-panel{display:none;position:fixed;inset:0;z-index:9999;background:var(--paper);overflow-y:auto}
+#admin-panel.open{display:block}
+.admin-topbar{background:var(--ink);color:#fff;height:56px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:10}
+.admin-topbar .logo{font-size:22px;color:#fff}
+.admin-topbar .logo span{color:var(--red)}
+.admin-topbar .close-admin{margin-left:auto;background:rgba(255,255,255,.1);border:none;color:#fff;width:36px;height:36px;border-radius:2px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.admin-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px)}
+.admin-sidebar{background:var(--white);border-right:1px solid var(--border);padding:24px 0}
+.admin-nav-item{display:flex;align-items:center;gap:10px;padding:10px 24px;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s;border-left:3px solid transparent}
+.admin-nav-item:hover{background:var(--cream)}
+.admin-nav-item.active{background:var(--cream);border-left-color:var(--red);color:var(--ink)}
+.admin-nav-item svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
+.admin-content{padding:32px}
+.admin-section{display:none}
+.admin-section.active{display:block}
+.admin-page-title{font-family:var(--font-display);font-size:26px;margin-bottom:24px}
+
+/* stat cards */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:2px;padding:20px}
+.stat-card .s-num{font-family:var(--font-mono);font-size:32px;font-weight:500;line-height:1}
+.stat-card .s-label{font-size:12px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:1px}
+.stat-card .s-delta{font-size:12px;color:#16a34a;margin-top:4px;font-weight:500}
+.stat-card .s-delta.neg{color:var(--red)}
+
+/* table */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.data-table th{text-align:left;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border);padding:8px 12px}
+.data-table td{padding:12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.data-table tr:hover td{background:var(--cream)}
+.badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:3px 8px;border-radius:2px}
+.badge-green{background:#dcfce7;color:#15803d}
+.badge-yellow{background:#fef9c3;color:#854d0e}
+.badge-red{background:#fee2e2;color:var(--red-dark)}
+.badge-blue{background:#dbeafe;color:#1d4ed8}
+
+/* forms */
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.form-control{width:100%;background:var(--white);border:1.5px solid var(--border);border-radius:2px;padding:10px 14px;font-family:var(--font-body);font-size:14px;color:var(--ink);outline:none;transition:border .15s}
+.form-control:focus{border-color:var(--ink)}
+textarea.form-control{min-height:120px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-actions{display:flex;gap:12px;margin-top:24px}
+
+/* insights chart */
+.chart-wrap{background:var(--white);border:1px solid var(--border);border-radius:2px;padding:20px;margin-bottom:24px}
+.chart-wrap h4{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:16px}
+.bar-chart{display:flex;align-items:flex-end;gap:4px;height:100px}
+.bar{background:var(--red);border-radius:2px 2px 0 0;flex:1;transition:opacity .15s;position:relative;min-width:12px}
+.bar:hover{opacity:.75}
+.bar-label{font-size:9px;color:var(--muted);text-align:center;margin-top:4px}
+.chart-days{display:flex;gap:4px}
+.chart-days span{flex:1;text-align:center;font-size:9px;color:var(--muted);min-width:12px}
+.top-posts-list li{list-style:none;display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.top-posts-list li:last-child{border:none}
+.post-bar-wrap{flex:1;height:6px;background:var(--cream);border-radius:4px;overflow:hidden}
+.post-bar{height:100%;background:var(--red);border-radius:4px}
+.post-views{font-family:var(--font-mono);font-size:12px;color:var(--muted);width:48px;text-align:right;flex-shrink:0}
+
+/* modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99990;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal-box{background:var(--white);border-radius:4px;padding:32px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto}
+.modal-box h3{font-family:var(--font-display);font-size:22px;margin-bottom:20px}
+.modal-close{float:right;background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)}
+
+/* share modal */
+.share-modal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+.share-modal-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 12px;border:1.5px solid var(--border);border-radius:4px;cursor:pointer;background:transparent;font-family:var(--font-body);font-size:12px;font-weight:500;color:var(--ink);transition:all .15s}
+.share-modal-btn:hover{background:var(--cream);border-color:var(--ink)}
+.share-modal-btn svg{width:22px;height:22px}
+.share-url-box{display:flex;gap:8px;margin-top:16px}
+.share-url-box input{flex:1;background:var(--cream);border:1.5px solid var(--border);border-radius:2px;padding:10px;font-size:13px;font-family:var(--font-mono)}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);color:rgba(255,255,255,.7);padding:48px 24px 24px}
+.footer-inner{max-width:1440px;margin:0 auto}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;margin-bottom:40px}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr}}
+.footer-brand{font-family:var(--font-display);font-size:32px;font-weight:900;color:#fff;letter-spacing:-1px}
+.footer-brand span{color:var(--red)}
+.footer-tagline{font-size:13px;margin-top:8px;opacity:.6;line-height:1.6}
+.footer-col h4{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#fff;margin-bottom:12px}
+.footer-col a{display:block;font-size:13px;color:rgba(255,255,255,.55);text-decoration:none;margin-bottom:8px}
+.footer-col a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:gap;gap:12px}
+.footer-bottom p{font-size:12px;opacity:.4}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;font-size:13px;padding:12px 20px;border-radius:4px;z-index:99999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- ══ ANTI-AD-BLOCK WALL ══ -->
+<div id="adblock-wall">
+  <div class="adblock-box">
+    <div style="font-size:48px;margin-bottom:16px">📰</div>
+    <h2>We noticed your ad blocker</h2>
+    <p>Sound is free to read because of advertising. Our ads are carefully vetted and non-intrusive. Please consider allowing ads on Sound to support independent journalism.</p>
+    <button class="btn-allow" onclick="dismissAdwall()">I'll Allow Ads – Continue Reading</button>
+    <span class="btn-sub" onclick="dismissAdwall()">I already disabled it — reload</span>
+    <p style="margin-top:20px;font-size:12px;color:var(--muted)">Or <a href="#" style="color:var(--red)" onclick="openAdmin()">subscribe to Sound+</a> for an ad-free experience.</p>
+  </div>
+</div>
+
+<!-- ══ BREAKING NEWS TICKER ══ -->
+<div class="breaking-bar">
+  <div class="breaking-label">⚡ Breaking</div>
+  <div class="ticker-wrap">
+    <div class="ticker" id="ticker">
+      <span class="ticker-item"><span class="ticker-sep">◆</span> Kenya's GDP grows 5.4% in Q1 2026 — fastest pace in four years</span>
+      <span class="ticker-item"><span class="ticker-sep">◆</span> East African Community summit scheduled for July in Nairobi</span>
+      <span class="ticker-item"><span class="ticker-sep">◆</span> Tech giant opens 500-employee AI hub in Nairobi Silicon Savannah</span>
+      <span class="ticker-item"><span class="ticker-sep">◆</span> Kenya Power announces 18-hour rolling blackouts in western counties</span>
+      <span class="ticker-item"><span class="ticker-sep">◆</span> Harambee Stars qualifies for AFCON 2026 after historic victory in Kampala</span>
+      <span class="ticker-item"><span class="ticker-sep">◆</span> Central Bank holds base rate at 12.5% amid global uncertainty</span>
+      <span class="ticker-item"><span class="ticker-sep">◆</span> Kenya's GDP grows 5.4% in Q1 2026 — fastest pace in four years</span>
+      <span class="ticker-item"><span class="ticker-sep">◆</span> East African Community summit scheduled for July in Nairobi</span>
+      <span class="ticker-item"><span class="ticker-sep">◆</span> Tech giant opens 500-employee AI hub in Nairobi Silicon Savannah</span>
+      <span class="ticker-item"><span class="ticker-sep">◆</span> Kenya Power announces 18-hour rolling blackouts in western counties</span>
+      <span class="ticker-item"><span class="ticker-sep">◆</span> Harambee Stars qualifies for AFCON 2026 after historic victory in Kampala</span>
+      <span class="ticker-item"><span class="ticker-sep">◆</span> Central Bank holds base rate at 12.5% amid global uncertainty</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HEADER ══ -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#">Sound<span>.</span></a>
+    <nav class="nav-main">
+      <a href="#" class="active">Home</a>
+      <a href="#">Politics</a>
+      <a href="#">Business</a>
+      <a href="#">Technology</a>
+      <a href="#">Sports</a>
+      <a href="#">Culture</a>
+      <a href="#">Opinion</a>
+      <a href="#">World</a>
+    </nav>
+    <div class="header-actions">
+      <button class="search-btn" title="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+      <button class="btn btn-outline" onclick="openAdmin()">Dashboard</button>
+      <button class="btn btn-red">Subscribe</button>
+    </div>
+  </div>
+</header>
+
+<!-- ══ AD LEADERBOARD (AdSense / Adsterra zone) ══ -->
+<div class="site-wrap" style="padding-top:16px">
+  <div class="ad-unit ad-leaderboard" id="ad-leaderboard">
+    <span class="ad-provider">728×90 Leaderboard — AdSense / Adsterra / Media.net</span>
+  </div>
+</div>
+
+<!-- ══ MAIN CONTENT ══ -->
+<div class="site-wrap">
+  <div class="two-col">
+    <!-- ─ PRIMARY COLUMN ─ -->
+    <main>
+      <!-- Hero grid -->
+      <div class="hero-grid">
+        <div class="hero-main" onclick="openShareModal('Kenya sets ambitious renewable energy target for 2030')">
+          <img class="hero-img" src="https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=900&q=80" alt="Solar panels">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <span class="hero-cat">Energy</span>
+            <h1 class="hero-title">Kenya sets bold target: 100% renewable electricity by 2030 as solar investments surge</h1>
+            <p class="hero-meta">By <strong>Amara Osei</strong> · 2 hours ago · 6 min read</p>
+          </div>
+        </div>
+        <div class="hero-side" onclick="openShareModal('Nairobi tech week draws record investors')">
+          <img class="hero-img" src="https://images.unsplash.com/photo-1526628953301-3cd64e4a33dd?w=600&q=80" alt="Tech">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <span class="hero-cat">Technology</span>
+            <h2 class="hero-title" style="font-size:15px">Nairobi Tech Week draws record $2.4B in investor commitments</h2>
+            <p class="hero-meta">4 hours ago · 4 min read</p>
+          </div>
+        </div>
+        <div class="hero-side" onclick="openShareModal('East Africa inflation falls to 4-year low')">
+          <img class="hero-img" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&q=80" alt="Finance">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <span class="hero-cat">Economy</span>
+            <h2 class="hero-title" style="font-size:15px">East Africa inflation falls to 4-year low as food supply stabilises</h2>
+            <p class="hero-meta">6 hours ago · 3 min read</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Latest -->
+      <div class="section-label">Latest Stories <a href="#">View all →</a></div>
+      <div class="article-grid" id="articles-grid">
+        <!-- injected by JS -->
+      </div>
+
+      <!-- Mid-page Ad (rectangle) -->
+      <div class="ad-unit ad-rectangle" id="ad-mid">
+        <span class="ad-provider">300×250 Rectangle — AdSense / PropellerAds / Ezoic</span>
+      </div>
+
+      <!-- Section: Opinion -->
+      <div class="section-label" style="margin-top:16px">Opinion <a href="#">View all →</a></div>
+      <div class="article-grid" id="opinion-grid"></div>
+
+      <!-- Share bar (demo) -->
+      <div class="share-bar">
+        <span class="share-label">Share</span>
+        <button class="share-btn" title="Share on X" onclick="shareOn('twitter')"><svg viewBox="0 0 24 24" stroke="currentColor"><path d="M4 4l16 16M4 20L20 4"/></svg></button>
+        <button class="share-btn" title="Share on Facebook" onclick="shareOn('facebook')"><svg viewBox="0 0 24 24" stroke="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></button>
+        <button class="share-btn" title="Share on WhatsApp" onclick="shareOn('whatsapp')"><svg viewBox="0 0 24 24" stroke="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>
+        <button class="share-btn" title="Share on LinkedIn" onclick="shareOn('linkedin')"><svg viewBox="0 0 24 24" stroke="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg></button>
+        <button class="share-btn share-copy" title="Copy link" onclick="copyLink()"><svg viewBox="0 0 24 24" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+        <span class="share-copy-msg" id="copy-msg">Link copied!</span>
+      </div>
+
+      <!-- Bottom ad -->
+      <div class="ad-unit ad-half" id="ad-bottom">
+        <span class="ad-provider">728×90 Footer Ad — Adsterra / Valueclick / Taboola</span>
+      </div>
+    </main>
+
+    <!-- ─ SIDEBAR ─ -->
+    <aside class="sidebar">
+      <!-- Trending -->
+      <div class="sidebar-block">
+        <h3>Trending Now</h3>
+        <ul class="sidebar-list" id="trending-list"></ul>
+      </div>
+
+      <!-- Sidebar Ad -->
+      <div class="ad-unit" style="height:600px">
+        <span class="ad-provider">160×600 Skyscraper — AdSense / Adsterra</span>
+      </div>
+
+      <!-- Writers -->
+      <div class="sidebar-block">
+        <h3>Our Writers</h3>
+        <div id="writers-mini"></div>
+      </div>
+
+      <!-- Second sidebar ad -->
+      <div class="ad-unit ad-rectangle">
+        <span class="ad-provider">300×250 Rectangle — Media.net / Ezoic</span>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">Sound<span>.</span></div>
+        <p class="footer-tagline">Independent journalism from East Africa and beyond. Accurate, timely, and told with depth.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Sections</h4>
+        <a href="#">Politics</a><a href="#">Business</a><a href="#">Technology</a><a href="#">Sports</a><a href="#">Culture</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="#">About Us</a><a href="#">Careers</a><a href="#">Advertise</a><a href="#" onclick="openAdmin()">Dashboard</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="#">Privacy Policy</a><a href="#">Terms of Use</a><a href="#">Cookie Settings</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Sound Media Ltd. All rights reserved.</p>
+      <p>Built with ♥ in Nairobi</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ══ SHARE MODAL ══ -->
+<div class="modal-bg" id="share-modal-bg">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeShareModal()">×</button>
+    <h3>Share this story</h3>
+    <p id="share-modal-title" style="font-size:14px;color:var(--muted);margin-bottom:0"></p>
+    <div class="share-modal-grid">
+      <button class="share-modal-btn" onclick="shareOn('twitter')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4l16 16M4 20L20 4"/></svg>X (Twitter)
+      </button>
+      <button class="share-modal-btn" onclick="shareOn('facebook')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>Facebook
+      </button>
+      <button class="share-modal-btn" onclick="shareOn('whatsapp')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>WhatsApp
+      </button>
+      <button class="share-modal-btn" onclick="shareOn('linkedin')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>LinkedIn
+      </button>
+      <button class="share-modal-btn" onclick="shareOn('telegram')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 5L2 12.5l7 1M21 5l-2.5 15-6-5M21 5 9 13.5m0 0V19l3.5-3"/></svg>Telegram
+      </button>
+      <button class="share-modal-btn" onclick="shareOn('email')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>Email
+      </button>
+    </div>
+    <div class="share-url-box">
+      <input type="text" id="share-url-input" readonly value="https://sound.co.ke/story/kenya-renewable-energy">
+      <button class="btn btn-red" onclick="copyShareLink()">Copy</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN PANEL ══ -->
+<div id="admin-panel">
+  <div class="admin-topbar">
+    <span class="logo">Sound<span>.</span> <span style="font-size:13px;opacity:.5;font-family:var(--font-body);margin-left:8px">Dashboard</span></span>
+    <button class="close-admin" onclick="closeAdmin()" title="Close">×</button>
+  </div>
+  <div class="admin-layout">
+    <!-- Admin sidebar -->
+    <nav class="admin-sidebar">
+      <div class="admin-nav-item active" onclick="adminTab('overview')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Overview
+      </div>
+      <div class="admin-nav-item" onclick="adminTab('posts')">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Posts
+      </div>
+      <div class="admin-nav-item" onclick="adminTab('writers')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Writers
+      </div>
+      <div class="admin-nav-item" onclick="adminTab('insights')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Insights
+      </div>
+      <div class="admin-nav-item" onclick="adminTab('ads')">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Ad Management
+      </div>
+      <div class="admin-nav-item" onclick="adminTab('new-post')">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Post
+      </div>
+    </nav>
+
+    <!-- Admin content -->
+    <div class="admin-content">
+
+      <!-- OVERVIEW -->
+      <div class="admin-section active" id="section-overview">
+        <h2 class="admin-page-title">Overview</h2>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="s-num">124,830</div><div class="s-label">Page Views (30d)</div><div class="s-delta">↑ 12.4%</div></div>
+          <div class="stat-card"><div class="s-num">38,120</div><div class="s-label">Unique Visitors</div><div class="s-delta">↑ 8.1%</div></div>
+          <div class="stat-card"><div class="s-num">4m 22s</div><div class="s-label">Avg. Session</div><div class="s-delta">↑ 0.4%</div></div>
+          <div class="stat-card"><div class="s-num">Ksh 48,200</div><div class="s-label">Ad Revenue (30d)</div><div class="s-delta">↑ 5.7%</div></div>
+          <div class="stat-card"><div class="s-num">87</div><div class="s-label">Posts Published</div><div class="s-delta neg">↓ 3.2%</div></div>
+          <div class="stat-card"><div class="s-num">12</div><div class="s-label">Active Writers</div><div class="s-delta">↑ 2</div></div>
+        </div>
+        <div class="chart-wrap">
+          <h4>Daily pageviews – last 14 days</h4>
+          <div class="bar-chart" id="overview-chart"></div>
+          <div class="chart-days" id="overview-days"></div>
+        </div>
+      </div>
+
+      <!-- POSTS -->
+      <div class="admin-section" id="section-posts">
+        <h2 class="admin-page-title">Posts</h2>
+        <div style="display:flex;gap:12px;margin-bottom:20px;align-items:center">
+          <input class="form-control" placeholder="Search posts…" style="max-width:280px">
+          <select class="form-control" style="max-width:140px"><option>All Status</option><option>Published</option><option>Draft</option><option>Scheduled</option></select>
+          <button class="btn btn-red" onclick="adminTab('new-post')" style="margin-left:auto">+ New Post</button>
+        </div>
+        <table class="data-table" id="posts-table"></table>
+      </div>
+
+      <!-- WRITERS -->
+      <div class="admin-section" id="section-writers">
+        <h2 class="admin-page-title">Writers</h2>
+        <button class="btn btn-red" style="margin-bottom:20px" onclick="document.getElementById('writer-modal').classList.add('open')">+ Add Writer</button>
+        <table class="data-table" id="writers-table"></table>
+      </div>
+
+      <!-- INSIGHTS -->
+      <div class="admin-section" id="section-insights">
+        <h2 class="admin-page-title">Post Insights</h2>
+        <div class="chart-wrap">
+          <h4>Top 5 articles by views (30 days)</h4>
+          <ul class="top-posts-list" id="top-posts"></ul>
+        </div>
+        <div class="chart-wrap">
+          <h4>Traffic sources</h4>
+          <div id="traffic-sources"></div>
+        </div>
+        <div class="stat-grid" style="margin-top:0">
+          <div class="stat-card"><div class="s-num">68%</div><div class="s-label">Mobile share</div></div>
+          <div class="stat-card"><div class="s-num">4.1</div><div class="s-label">Pages / session</div></div>
+          <div class="stat-card"><div class="s-num">41%</div><div class="s-label">Return visitors</div></div>
+          <div class="stat-card"><div class="s-num">2.8%</div><div class="s-label">Email CTR</div></div>
+        </div>
+      </div>
+
+      <!-- ADS -->
+      <div class="admin-section" id="section-ads">
+        <h2 class="admin-page-title">Ad Management</h2>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="s-num">Ksh 48.2K</div><div class="s-label">Revenue (30d)</div><div class="s-delta">↑ 5.7%</div></div>
+          <div class="stat-card"><div class="s-num">2.14%</div><div class="s-label">Overall CTR</div></div>
+          <div class="stat-card"><div class="s-num">284K</div><div class="s-label">Impressions</div></div>
+          <div class="stat-card"><div class="s-num">4</div><div class="s-label">Active Networks</div></div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Network</th><th>Slot</th><th>Status</th><th>Revenue (30d)</th><th>CTR</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Google AdSense</strong></td><td>Leaderboard 728×90</td><td><span class="badge badge-green">Active</span></td><td>Ksh 18,400</td><td>2.3%</td><td><button class="btn btn-outline" style="padding:4px 10px;font-size:12px">Configure</button></td></tr>
+            <tr><td><strong>Adsterra</strong></td><td>Rectangle 300×250</td><td><span class="badge badge-green">Active</span></td><td>Ksh 12,800</td><td>1.9%</td><td><button class="btn btn-outline" style="padding:4px 10px;font-size:12px">Configure</button></td></tr>
+            <tr><td><strong>Media.net</strong></td><td>Sidebar 160×600</td><td><span class="badge badge-yellow">Pending</span></td><td>Ksh 8,200</td><td>1.4%</td><td><button class="btn btn-outline" style="padding:4px 10px;font-size:12px">Configure</button></td></tr>
+            <tr><td><strong>Ezoic</strong></td><td>Footer Banner</td><td><span class="badge badge-green">Active</span></td><td>Ksh 6,400</td><td>0.9%</td><td><button class="btn btn-outline" style="padding:4px 10px;font-size:12px">Configure</button></td></tr>
+            <tr><td><strong>Taboola</strong></td><td>In-feed Native</td><td><span class="badge badge-red">Paused</span></td><td>Ksh 2,400</td><td>0.6%</td><td><button class="btn btn-outline" style="padding:4px 10px;font-size:12px">Configure</button></td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:32px">
+          <h4 style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Ad Code Injection</h4>
+          <div class="form-group"><label>AdSense Publisher ID</label><input class="form-control" placeholder="ca-pub-XXXXXXXXXXXXXXXXX" value="ca-pub-1234567890123456"></div>
+          <div class="form-group"><label>Adsterra Zone ID</label><input class="form-control" placeholder="Zone ID" value="5834921"></div>
+          <div class="form-group"><label>Anti-Adblock Mode</label>
+            <select class="form-control" style="max-width:200px">
+              <option selected>Soft wall (dismiss)</option>
+              <option>Hard wall (block content)</option>
+              <option>Banner only</option>
+              <option>Disabled</option>
+            </select>
+          </div>
+          <div class="form-actions"><button class="btn btn-red" onclick="showToast('Ad settings saved!')">Save Settings</button></div>
+        </div>
+      </div>
+
+      <!-- NEW POST -->
+      <div class="admin-section" id="section-new-post">
+        <h2 class="admin-page-title">New Post</h2>
+        <div class="form-group"><label>Headline</label><input class="form-control" id="np-title" placeholder="Enter headline…"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Category</label>
+            <select class="form-control" id="np-cat"><option>Politics</option><option>Business</option><option>Technology</option><option>Sports</option><option>Culture</option><option>Opinion</option><option>World</option></select>
+          </div>
+          <div class="form-group"><label>Author</label>
+            <select class="form-control" id="np-author">
+              <option>Amara Osei</option><option>David Mwangi</option><option>Priya Nair</option><option>Samuel Kimani</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label>Excerpt</label><textarea class="form-control" id="np-excerpt" placeholder="Brief summary shown in listings…" style="min-height:80px"></textarea></div>
+        <div class="form-group"><label>Body</label><textarea class="form-control" id="np-body" placeholder="Write your article…" style="min-height:280px"></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label>Featured Image URL</label><input class="form-control" id="np-img" placeholder="https://…"></div>
+          <div class="form-group"><label>Status</label>
+            <select class="form-control" id="np-status"><option>Published</option><option>Draft</option><option>Scheduled</option></select>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-red" onclick="submitPost()">Publish Post</button>
+          <button class="btn btn-outline" onclick="showToast('Saved as draft')">Save Draft</button>
+        </div>
+      </div>
+
+    </div><!-- /admin-content -->
+  </div><!-- /admin-layout -->
+</div><!-- /admin-panel -->
+
+<!-- ══ WRITER MODAL ══ -->
+<div class="modal-bg" id="writer-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('writer-modal').classList.remove('open')">×</button>
+    <h3>Add Writer</h3>
+    <div class="form-group"><label>Full Name</label><input class="form-control" id="w-name" placeholder="e.g. Jane Wambui"></div>
+    <div class="form-group"><label>Email</label><input class="form-control" id="w-email" type="email" placeholder="jane@sound.co.ke"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Beat / Section</label>
+        <select class="form-control" id="w-beat"><option>Politics</option><option>Business</option><option>Technology</option><option>Sports</option><option>Culture</option><option>Opinion</option></select>
+      </div>
+      <div class="form-group"><label>Role</label>
+        <select class="form-control" id="w-role"><option>Staff Writer</option><option>Senior Reporter</option><option>Contributor</option><option>Editor</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label>Bio</label><textarea class="form-control" id="w-bio" placeholder="Short bio…" style="min-height:80px"></textarea></div>
+    <div class="form-actions">
+      <button class="btn btn-red" onclick="addWriter()">Add Writer</button>
+      <button class="btn btn-outline" onclick="document.getElementById('writer-modal').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─────────── DATA ─────────── */
+const CATS = ['Politics','Business','Technology','Sports','Culture','Opinion','World'];
+const IMAGES = [
+  'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&q=70',
+  'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=600&q=70',
+  'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=70',
+  'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&q=70',
+  'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=600&q=70',
+  'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=70',
+];
+let articles = [
+  {id:1,title:"MPs debate sweeping anti-corruption bill amid public pressure",cat:"Politics",excerpt:"Lawmakers gather for a rare emergency sitting to address the landmark bill that could reshape public procurement.",author:"David Mwangi",date:"1h ago",read:"5 min",img:IMAGES[0],views:8420,status:"Published"},
+  {id:2,title:"Apple opens first East Africa store in Westlands, Nairobi",cat:"Technology",excerpt:"The 3,000 sq ft flagship store will employ 120 people and serve as a hub for startup partnerships.",author:"Priya Nair",date:"3h ago",read:"4 min",img:IMAGES[2],views:12100,status:"Published"},
+  {id:3,title:"Harambee Stars striker signs with Ligue 1 club",cat:"Sports",excerpt:"The 23-year-old forward moves to France in a deal reported to be worth €4.2 million.",author:"Samuel Kimani",date:"5h ago",read:"3 min",img:IMAGES[3],views:21300,status:"Published"},
+  {id:4,title:"KCB posts record profits despite rising NPLs",cat:"Business",excerpt:"Kenya's largest bank by assets reported a 22% jump in full-year net income, outpacing sector growth.",author:"Amara Osei",date:"7h ago",read:"6 min",img:IMAGES[1],views:6800,status:"Published"},
+  {id:5,title:"East Africa's youngest governor tackles drought with tech",cat:"World",excerpt:"A 34-year-old governor is deploying satellite data and drone surveys to predict and manage droughts.",author:"David Mwangi",date:"9h ago",read:"7 min",img:IMAGES[4],views:4900,status:"Published"},
+  {id:6,title:"Nairobi Film Festival breaks attendance record",cat:"Culture",excerpt:"Over 40,000 tickets were sold across 8 venues, with films from 28 countries.",author:"Priya Nair",date:"11h ago",read:"4 min",img:IMAGES[5],views:5300,status:"Draft"},
+];
+let writers = [
+  {id:1,name:"Amara Osei",email:"amara@sound.co.ke",beat:"Business",role:"Senior Reporter",posts:34,status:"Active"},
+  {id:2,name:"David Mwangi",email:"david@sound.co.ke",beat:"Politics",role:"Staff Writer",posts:28,status:"Active"},
+  {id:3,name:"Priya Nair",email:"priya@sound.co.ke",beat:"Technology",role:"Staff Writer",posts:21,status:"Active"},
+  {id:4,name:"Samuel Kimani",email:"samuel@sound.co.ke",beat:"Sports",role:"Contributor",posts:19,status:"Active"},
+];
+const TRENDING = [
+  {title:"Kenya Revenue Authority targets crypto traders in new tax directive",time:"2h ago"},
+  {title:"Safaricom's M-PESA passes 40 million active user milestone",time:"4h ago"},
+  {title:"Nairobi expressway Phase 2 construction begins",time:"6h ago"},
+  {title:"Kenyan-designed satellite successfully deployed from ISS",time:"8h ago"},
+  {title:"Record rains expected as La Niña intensifies over Indian Ocean",time:"10h ago"},
+];
+
+/* ─────────── RENDER ARTICLES ─────────── */
+function renderArticles(){
+  const g = document.getElementById('articles-grid');
+  g.innerHTML = articles.slice(0,6).map(a=>`
+    <div class="article-card" onclick="openShareModal('${a.title.replace(/'/g,"\\'")}')">
+      <img class="card-thumb" src="${a.img}" alt="${a.title}" loading="lazy">
+      <div class="card-cat">${a.cat}</div>
+      <div class="card-title">${a.title}</div>
+      <div class="card-excerpt">${a.excerpt}</div>
+      <div class="card-meta"><span>${a.author}</span><span class="dot"></span><span>${a.date}</span><span class="dot"></span><span class="read-time">${a.read}</span></div>
+    </div>`).join('');
+
+  const og = document.getElementById('opinion-grid');
+  og.innerHTML = articles.slice(1,4).map(a=>`
+    <div class="article-card" onclick="openShareModal('${a.title.replace(/'/g,"\\'")}')">
+      <img class="card-thumb" src="${a.img}" alt="${a.title}" loading="lazy">
+      <div class="card-cat">Opinion</div>
+      <div class="card-title">${a.title}</div>
+      <div class="card-excerpt">${a.excerpt}</div>
+      <div class="card-meta"><span>${a.author}</span><span class="dot"></span><span>${a.date}</span><span class="dot"></span><span class="read-time">${a.read}</span></div>
+    </div>`).join('');
+}
+
+/* ─────────── TRENDING SIDEBAR ─────────── */
+function renderTrending(){
+  document.getElementById('trending-list').innerHTML=TRENDING.map((t,i)=>`
+    <li><div class="sidebar-item"><span class="num">${String(i+1).padStart(2,'0')}</span><div>
+      <div class="si-title">${t.title}</div>
+      <div class="si-meta">${t.time}</div>
+    </div></div></li>`).join('');
+}
+function renderWritersMini(){
+  document.getElementById('writers-mini').innerHTML=writers.map(w=>`
+    <div class="writer-card">
+      <div class="writer-avatar" style="background:hsl(${w.id*60},50%,80%);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;color:#333">${w.name.split(' ').map(x=>x[0]).join('')}</div>
+      <div><div class="writer-name">${w.name}</div><div class="writer-beat">${w.beat}</div></div>
+      <div class="writer-posts">${w.posts} posts</div>
+    </div>`).join('');
+}
+
+/* ─────────── ADMIN TABS ─────────── */
+function adminTab(name){
+  document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.admin-nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('section-'+name).classList.add('active');
+  document.querySelectorAll('.admin-nav-item').forEach(n=>{
+    if(n.textContent.trim().toLowerCase().replace(' ','').includes(name.replace('-','').toLowerCase()))n.classList.add('active');
+  });
+  if(name==='posts')renderPostsTable();
+  if(name==='writers')renderWritersTable();
+  if(name==='insights')renderInsights();
+  if(name==='overview')renderOverviewChart();
+}
+function openAdmin(){document.getElementById('admin-panel').classList.add('open');renderOverviewChart()}
+function closeAdmin(){document.getElementById('admin-panel').classList.remove('open')}
+
+/* ─────────── OVERVIEW CHART ─────────── */
+function renderOverviewChart(){
+  const vals=[3200,4100,3800,5200,4700,6100,5800,7200,6800,7600,8100,7900,8400,9200];
+  const max=Math.max(...vals);
+  const c=document.getElementById('overview-chart');
+  const d=document.getElementById('overview-days');
+  const days=['M','T','W','T','F','S','S','M','T','W','T','F','S','S'];
+  c.innerHTML=vals.map((v,i)=>`<div class="bar" style="height:${Math.round(v/max*100)}%" title="${v.toLocaleString()} views"></div>`).join('');
+  d.innerHTML=days.map(d=>`<span>${d}</span>`).join('');
+}
+
+/* ─────────── POSTS TABLE ─────────── */
+function renderPostsTable(){
+  const t=document.getElementById('posts-table');
+  t.innerHTML=`<thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Status</th><th>Views</th><th>Date</th><th>Actions</th></tr></thead>
+  <tbody>${articles.map(a=>`<tr>
+    <td style="max-width:260px;font-weight:500">${a.title}</td>
+    <td><span class="badge badge-blue">${a.cat}</span></td>
+    <td>${a.author}</td>
+    <td><span class="badge ${a.status==='Published'?'badge-green':'badge-yellow'}">${a.status}</span></td>
+    <td>${a.views.toLocaleString()}</td>
+    <td>${a.date}</td>
+    <td><button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="showToast('Editing post…')">Edit</button></td>
+  </tr>`).join('')}</tbody>`;
+}
+
+/* ─────────── WRITERS TABLE ─────────── */
+function renderWritersTable(){
+  const t=document.getElementById('writers-table');
+  t.innerHTML=`<thead><tr><th>Name</th><th>Email</th><th>Beat</th><th>Role</th><th>Posts</th><th>Status</th><th>Actions</th></tr></thead>
+  <tbody>${writers.map(w=>`<tr>
+    <td><div style="display:flex;align-items:center;gap:10px">
+      <div style="width:32px;height:32px;border-radius:50%;background:hsl(${w.id*60},50%,80%);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">${w.name.split(' ').map(x=>x[0]).join('')}</div>
+      <strong>${w.name}</strong></div></td>
+    <td>${w.email}</td>
+    <td>${w.beat}</td>
+    <td>${w.role}</td>
+    <td>${w.posts}</td>
+    <td><span class="badge badge-green">${w.status}</span></td>
+    <td><button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="removeWriter(${w.id})">Remove</button></td>
+  </tr>`).join('')}</tbody>`;
+}
+function addWriter(){
+  const name=document.getElementById('w-name').value.trim();
+  const email=document.getElementById('w-email').value.trim();
+  if(!name||!email){showToast('Please fill required fields');return}
+  writers.push({id:Date.now(),name,email,beat:document.getElementById('w-beat').value,role:document.getElementById('w-role').value,posts:0,status:'Active'});
+  document.getElementById('writer-modal').classList.remove('open');
+  renderWritersTable();renderWritersMini();
+  showToast(`${name} added as writer`);
+}
+function removeWriter(id){
+  writers=writers.filter(w=>w.id!==id);
+  renderWritersTable();renderWritersMini();
+  showToast('Writer removed');
+}
+
+/* ─────────── INSIGHTS ─────────── */
+function renderInsights(){
+  const sorted=[...articles].sort((a,b)=>b.views-a.views).slice(0,5);
+  const maxV=sorted[0].views;
+  document.getElementById('top-posts').innerHTML=sorted.map(a=>`
+    <li>
+      <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.title}</div>
+      <div class="post-bar-wrap" style="margin-top:6px"><div class="post-bar" style="width:${Math.round(a.views/maxV*100)}%"></div></div></div>
+      <div class="post-views">${(a.views/1000).toFixed(1)}K</div>
+    </li>`).join('');
+
+  const sources=[{s:'Organic Search',pct:42},{s:'Direct',pct:28},{s:'Social Media',pct:18},{s:'Referral',pct:8},{s:'Email',pct:4}];
+  document.getElementById('traffic-sources').innerHTML=sources.map(s=>`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div style="width:130px;font-size:13px;flex-shrink:0">${s.s}</div>
+      <div style="flex:1;height:8px;background:var(--cream);border-radius:4px;overflow:hidden"><div style="height:100%;background:var(--red);width:${s.pct}%;border-radius:4px"></div></div>
+      <div style="width:36px;text-align:right;font-family:var(--font-mono);font-size:12px;color:var(--muted)">${s.pct}%</div>
+    </div>`).join('');
+}
+
+/* ─────────── NEW POST ─────────── */
+function submitPost(){
+  const title=document.getElementById('np-title').value.trim();
+  if(!title){showToast('Please enter a headline');return}
+  articles.unshift({
+    id:Date.now(),title,
+    cat:document.getElementById('np-cat').value,
+    excerpt:document.getElementById('np-excerpt').value||'No excerpt.',
+    author:document.getElementById('np-author').value,
+    date:'Just now',read:'1 min',
+    img:document.getElementById('np-img').value||IMAGES[0],
+    views:0,
+    status:document.getElementById('np-status').value
+  });
+  renderArticles();showToast('Post published successfully!');
+  ['np-title','np-excerpt','np-body','np-img'].forEach(id=>document.getElementById(id).value='');
+}
+
+/* ─────────── SHARE ─────────── */
+let _shareTitle='';
+function openShareModal(title){
+  _shareTitle=title;
+  document.getElementById('share-modal-title').textContent=title;
+  document.getElementById('share-url-input').value='https://sound.co.ke/story/'+title.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,40);
+  document.getElementById('share-modal-bg').classList.add('open');
+}
+function closeShareModal(){document.getElementById('share-modal-bg').classList.remove('open')}
+function shareOn(platform){
+  const url=encodeURIComponent(document.getElementById('share-url-input').value);
+  const text=encodeURIComponent(_shareTitle);
+  const links={
+    twitter:`https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+    facebook:`https://www.facebook.com/sharer/sharer.php?u=${url}`,
+    whatsapp:`https://wa.me/?text=${text}%20${url}`,
+    linkedin:`https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${text}`,
+    telegram:`https://t.me/share/url?url=${url}&text=${text}`,
+    email:`mailto:?subject=${text}&body=Read+this+article:+${url}`,
+  };
+  if(links[platform])window.open(links[platform],'_blank','noopener,noreferrer,width=600,height=500');
+  closeShareModal();
+  showToast('Opening share window…');
+}
+function copyShareLink(){
+  const v=document.getElementById('share-url-input').value;
+  navigator.clipboard.writeText(v).then(()=>showToast('Link copied to clipboard!')).catch(()=>showToast('Copy failed – select the URL manually'));
+}
+function copyLink(){
+  navigator.clipboard.writeText(location.href).then(()=>{
+    const m=document.getElementById('copy-msg');m.classList.add('show');
+    setTimeout(()=>m.classList.remove('show'),2500);
+  });
+}
+
+/* ─────────── ANTI-ADBLOCK ─────────── */
+function detectAdBlock(){
+  const bait=document.createElement('div');
+  bait.setAttribute('class','pub_300x250 pub_300x250m pub_728x90 text-ad textAd text_ad text_ads ad-unit');
+  bait.setAttribute('style','position:absolute;top:-10000px;left:-10000px;width:1px;height:1px;');
+  document.body.appendChild(bait);
+  setTimeout(()=>{
+    const blocked=!bait.offsetParent||bait.offsetWidth===0||bait.offsetHeight===0||window.getComputedStyle(bait).display==='none';
+    bait.remove();
+    if(blocked&&!sessionStorage.getItem('adwall_dismissed'))
+      document.getElementById('adblock-wall').classList.add('show');
+  },500);
+}
+function dismissAdwall(){
+  sessionStorage.setItem('adwall_dismissed','1');
+  document.getElementById('adblock-wall').classList.remove('show');
+}
+
+/* ─────────── TOAST ─────────── */
+let _toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ─────────── INIT ─────────── */
+renderArticles();renderTrending();renderWritersMini();
+detectAdBlock();
+
+/* close modals on backdrop click */
+document.getElementById('share-modal-bg').addEventListener('click',e=>{if(e.target===e.currentTarget)closeShareModal()});
+document.getElementById('writer-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('open')});
+</script>
+</body>
+</html>

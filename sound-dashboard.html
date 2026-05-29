@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sound. — Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Epilogue:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0c0e;--surface:#13151a;--surface2:#1c1f27;--surface3:#252932;
+  --border:#2a2d38;--border2:#363a48;
+  --red:#e63946;--red-dim:#7b1d24;
+  --gold:#f4a261;--teal:#2ec4b6;--blue:#4361ee;
+  --text:#e8e9ed;--muted:#6b7280;--faint:#3d4150;
+  --font-head:'Syne',sans-serif;
+  --font-body:'Epilogue',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --sidebar:240px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;display:flex;min-height:100vh;overflow-x:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform .3s}
+.sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sidebar-logo .brand{font-family:var(--font-head);font-size:26px;font-weight:800;color:var(--text);letter-spacing:-1px}
+.sidebar-logo .brand span{color:var(--red)}
+.sidebar-logo .sub{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+.sidebar-nav{flex:1;padding:16px 0;overflow-y:auto}
+.nav-group{margin-bottom:24px}
+.nav-group-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--faint);padding:0 20px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:10px 20px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-left:3px solid transparent;transition:all .15s;text-decoration:none}
+.nav-item svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
+.nav-item:hover{color:var(--text);background:var(--surface2)}
+.nav-item.active{color:var(--red);border-left-color:var(--red);background:rgba(230,57,70,.07)}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+.sidebar-footer .sf-user{display:flex;align-items:center;gap:10px}
+.sf-avatar{width:32px;height:32px;border-radius:50%;background:var(--red-dim);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--red);flex-shrink:0}
+.sf-name{font-weight:500;color:var(--text);font-size:13px}
+.sf-role{font-size:11px;color:var(--muted)}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar);flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);height:60px;display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:90;flex-shrink:0}
+.topbar-title{font-family:var(--font-head);font-size:18px;font-weight:700;flex:1}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.topbar-badge{background:var(--red-dim);color:var(--red);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px}
+.icon-btn{width:36px;height:36px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;color:var(--muted)}
+.icon-btn:hover{border-color:var(--border2);color:var(--text)}
+.icon-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8}
+.content{padding:28px;flex:1}
+
+/* ── SECTION VISIBILITY ── */
+.section{display:none}
+.section.active{display:block}
+
+/* ── PAGE HEADER ── */
+.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap}
+.page-hdr h1{font-family:var(--font-head);font-size:26px;font-weight:800;letter-spacing:-.5px}
+.page-hdr p{font-size:13px;color:var(--muted);margin-top:3px}
+
+/* ── BUTTONS ── */
+.btn{font-family:var(--font-body);cursor:pointer;border:none;border-radius:6px;font-size:13px;font-weight:600;padding:9px 20px;transition:all .15s;letter-spacing:.3px;display:inline-flex;align-items:center;gap:7px}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover{background:#c62c38}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--border2);background:var(--surface3)}
+
+/* ── STAT CARDS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;position:relative;overflow:hidden;transition:border-color .2s}
+.stat-card:hover{border-color:var(--border2)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.accent-red::before{background:var(--red)}
+.stat-card.accent-teal::before{background:var(--teal)}
+.stat-card.accent-gold::before{background:var(--gold)}
+.stat-card.accent-blue::before{background:var(--blue)}
+.s-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.s-num{font-family:var(--font-mono);font-size:30px;font-weight:500;color:var(--text);line-height:1}
+.s-delta{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;margin-top:8px;padding:2px 8px;border-radius:20px}
+.s-delta.up{background:rgba(46,196,182,.12);color:var(--teal)}
+.s-delta.down{background:rgba(230,57,70,.12);color:var(--red)}
+.s-sub{font-size:12px;color:var(--muted);margin-top:6px}
+
+/* ── CARD WRAPPER ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.card-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-head h3{font-family:var(--font-head);font-size:14px;font-weight:700;letter-spacing:-.2px}
+.card-head .tag{font-size:11px;color:var(--muted)}
+.card-body{padding:22px}
+
+/* ── CHARTS ── */
+.bar-chart-wrap{display:flex;align-items:flex-end;gap:6px;height:130px;padding-bottom:4px}
+.bc-bar{flex:1;background:var(--red-dim);border-radius:4px 4px 0 0;position:relative;cursor:pointer;transition:background .15s;min-width:10px}
+.bc-bar:hover{background:var(--red)}
+.bc-bar::after{content:attr(data-val);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);white-space:nowrap;opacity:0;transition:opacity .15s;font-family:var(--font-mono)}
+.bc-bar:hover::after{opacity:1}
+.bc-days{display:flex;gap:6px;margin-top:6px}
+.bc-days span{flex:1;text-align:center;font-size:9px;color:var(--faint);min-width:10px}
+
+/* donut chart */
+.donut-wrap{display:flex;align-items:center;gap:24px}
+.donut{position:relative;flex-shrink:0}
+.donut svg{transform:rotate(-90deg)}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.donut-center .dc-num{font-family:var(--font-mono);font-size:22px;font-weight:500}
+.donut-center .dc-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.donut-legend{display:flex;flex-direction:column;gap:10px;flex:1}
+.dl-row{display:flex;align-items:center;gap:10px;font-size:13px}
+.dl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dl-name{flex:1;color:var(--text)}
+.dl-pct{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+
+/* sparkline */
+.sparkline-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.sparkline-row:last-child{border:none}
+.sp-name{width:120px;font-size:13px;flex-shrink:0}
+.sp-bar{flex:1;height:6px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.sp-fill{height:100%;border-radius:4px;background:var(--red)}
+.sp-num{font-family:var(--font-mono);font-size:12px;color:var(--muted);width:52px;text-align:right;flex-shrink:0}
+
+/* ── TABLES ── */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border);padding:10px 14px}
+.data-table td{padding:13px 14px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
+.data-table tbody tr:hover td{background:var(--surface2)}
+.data-table tbody tr:last-child td{border:none}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:3px 9px;border-radius:20px;gap:4px}
+.badge-green{background:rgba(46,196,182,.15);color:var(--teal)}
+.badge-yellow{background:rgba(244,162,97,.15);color:var(--gold)}
+.badge-red{background:rgba(230,57,70,.15);color:var(--red)}
+.badge-blue{background:rgba(67,97,238,.2);color:#7b9ff9}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* ── FORMS ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:700px){.form-grid{grid-template-columns:1fr}}
+.form-group{margin-bottom:18px}
+.form-group label{display:block;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.form-control{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:var(--font-body);font-size:13px;color:var(--text);outline:none;transition:border .15s}
+.form-control:focus{border-color:var(--red);background:var(--surface3)}
+.form-control option{background:var(--surface2)}
+textarea.form-control{min-height:130px;resize:vertical}
+.form-actions{display:flex;gap:12px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+
+/* ── WRITER CARD (grid) ── */
+.writers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.writer-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;transition:border-color .2s;position:relative}
+.writer-card:hover{border-color:var(--border2)}
+.wc-top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.wc-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.wc-name{font-family:var(--font-head);font-size:16px;font-weight:700;line-height:1.2}
+.wc-role{font-size:12px;color:var(--muted);margin-top:2px}
+.wc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid var(--border);padding-top:14px;text-align:center}
+.wcs-num{font-family:var(--font-mono);font-size:18px;font-weight:500;color:var(--text)}
+.wcs-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.wc-actions{position:absolute;top:14px;right:14px;display:flex;gap:6px}
+.wc-action-btn{width:28px;height:28px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all .15s}
+.wc-action-btn:hover{color:var(--red);border-color:var(--red)}
+.wc-action-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* ── ADS TABLE ── */
+.ad-network-row td:first-child{font-weight:600}
+.revenue-bar{height:4px;background:var(--surface3);border-radius:4px;overflow:hidden;margin-top:4px}
+.revenue-bar-fill{height:100%;background:var(--red);border-radius:4px}
+
+/* ── MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:999;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:90%;max-width:540px;max-height:90vh;overflow-y:auto}
+.modal-head{padding:22px 24px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-head h3{font-family:var(--font-head);font-size:18px;font-weight:700}
+.modal-close{width:32px;height:32px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;color:var(--muted);font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.modal-close:hover{color:var(--text);border-color:var(--border2)}
+.modal-body{padding:24px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;padding:13px 20px;z-index:9999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);flex-shrink:0}
+
+/* ── INSIGHTS: trend sparklines ── */
+.trend-inline{display:flex;align-items:flex-end;gap:2px;height:24px}
+.ti-bar{width:3px;border-radius:1px;background:var(--red-dim);transition:background .15s}
+.trend-inline:hover .ti-bar{background:var(--red)}
+
+/* ── ACTIVITY FEED ── */
+.activity-list{display:flex;flex-direction:column;gap:0}
+.activity-item{display:flex;gap:14px;padding:13px 0;border-bottom:1px solid var(--border)}
+.activity-item:last-child{border:none}
+.ai-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ai-icon svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.ai-text{font-size:13px;line-height:1.5}
+.ai-text strong{font-weight:600;color:var(--text)}
+.ai-meta{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.section.active .stat-card{animation:fadeUp .3s ease both}
+.section.active .stat-card:nth-child(1){animation-delay:.04s}
+.section.active .stat-card:nth-child(2){animation-delay:.08s}
+.section.active .stat-card:nth-child(3){animation-delay:.12s}
+.section.active .stat-card:nth-child(4){animation-delay:.16s}
+.section.active .stat-card:nth-child(5){animation-delay:.20s}
+.section.active .stat-card:nth-child(6){animation-delay:.24s}
+.section.active .card{animation:fadeUp .35s ease both;animation-delay:.15s}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .topbar .menu-toggle{display:flex}
+}
+.menu-toggle{display:none;align-items:center;justify-content:center;width:36px;height:36px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;flex-shrink:0}
+.menu-toggle svg{width:18px;height:18px;stroke:var(--text);fill:none;stroke-width:1.8}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">Sound<span>.</span></div>
+    <div class="sub">Admin Dashboard</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group">
+      <div class="nav-group-label">Main</div>
+      <a class="nav-item active" onclick="gotoTab('overview',this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Overview
+      </a>
+      <a class="nav-item" onclick="gotoTab('insights',this)">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Insights
+      </a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Content</div>
+      <a class="nav-item" onclick="gotoTab('posts',this)">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Posts
+      </a>
+      <a class="nav-item" onclick="gotoTab('writers',this)">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Writers
+      </a>
+      <a class="nav-item" onclick="gotoTab('new-post',this)">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Post
+      </a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">Monetisation</div>
+      <a class="nav-item" onclick="gotoTab('ads',this)">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Ad Management
+      </a>
+      <a class="nav-item" onclick="gotoTab('revenue',this)">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Revenue
+      </a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-label">System</div>
+      <a class="nav-item" onclick="gotoTab('settings',this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Settings
+      </a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sf-user">
+      <div class="sf-avatar">AO</div>
+      <div><div class="sf-name">Amara Osei</div><div class="sf-role">Super Admin</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="menu-toggle" id="menu-toggle"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="topbar-title" id="topbar-title">Overview</div>
+    <div class="topbar-actions">
+      <span class="topbar-badge" id="live-badge">● LIVE</span>
+      <button class="icon-btn" title="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+      <button class="icon-btn" title="Notifications"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+      <a href="sound-blog.html" class="btn btn-ghost" style="font-size:12px;padding:7px 14px" title="Back to site">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2"><path d="m9 18 6-6-6-6"/></svg>View Site
+      </a>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══ OVERVIEW ══ -->
+    <div class="section active" id="tab-overview">
+      <div class="page-hdr">
+        <div><h1>Overview</h1><p>Last updated just now · Fri 29 May 2026</p></div>
+        <button class="btn btn-ghost" onclick="showToast('Exporting report…')">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export
+        </button>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card accent-red">
+          <div class="s-label">Page Views (30d)</div>
+          <div class="s-num">124,830</div>
+          <div class="s-delta up">↑ 12.4% vs last month</div>
+        </div>
+        <div class="stat-card accent-teal">
+          <div class="s-label">Unique Visitors</div>
+          <div class="s-num">38,120</div>
+          <div class="s-delta up">↑ 8.1%</div>
+        </div>
+        <div class="stat-card accent-gold">
+          <div class="s-label">Avg. Session</div>
+          <div class="s-num">4m 22s</div>
+          <div class="s-delta up">↑ 0.4%</div>
+        </div>
+        <div class="stat-card accent-blue">
+          <div class="s-label">Ad Revenue (30d)</div>
+          <div class="s-num">Ksh 48.2K</div>
+          <div class="s-delta up">↑ 5.7%</div>
+        </div>
+        <div class="stat-card accent-red">
+          <div class="s-label">Posts Published</div>
+          <div class="s-num">87</div>
+          <div class="s-delta down">↓ 3.2%</div>
+        </div>
+        <div class="stat-card accent-teal">
+          <div class="s-label">Active Writers</div>
+          <div class="s-num">12</div>
+          <div class="s-delta up">↑ 2 this month</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:20px">
+        <div class="card">
+          <div class="card-head"><h3>Daily Pageviews — 14 days</h3><span class="tag">May 16 – May 29</span></div>
+          <div class="card-body">
+            <div class="bar-chart-wrap" id="ov-chart"></div>
+            <div class="bc-days" id="ov-days"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Traffic Sources</h3></div>
+          <div class="card-body">
+            <div class="donut-wrap" id="donut-wrap"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Recent Activity</h3><span class="tag">Last 24 hours</span></div>
+        <div class="card-body" style="padding:0 22px">
+          <div class="activity-list" id="activity-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ INSIGHTS ══ -->
+    <div class="section" id="tab-insights">
+      <div class="page-hdr"><div><h1>Post Insights</h1><p>Performance metrics for all published content</p></div></div>
+      <div class="stat-grid">
+        <div class="stat-card accent-red"><div class="s-label">Total Article Views</div><div class="s-num">58,120</div><div class="s-delta up">↑ 9.3%</div></div>
+        <div class="stat-card accent-teal"><div class="s-label">Avg. Read Time</div><div class="s-num">3m 47s</div><div class="s-delta up">↑ 12s</div></div>
+        <div class="stat-card accent-gold"><div class="s-label">Shares (30d)</div><div class="s-num">4,820</div><div class="s-delta up">↑ 22%</div></div>
+        <div class="stat-card accent-blue"><div class="s-label">Comments</div><div class="s-num">1,204</div><div class="s-delta down">↓ 4%</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Top 5 Articles by Views</h3><span class="tag">30-day window</span></div>
+        <div class="card-body" id="top-articles-chart" style="padding:6px 22px 12px"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="card">
+          <div class="card-head"><h3>Views by Category</h3></div>
+          <div class="card-body" id="cat-chart"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Engagement Breakdown</h3></div>
+          <div class="card-body">
+            <div class="stat-grid" style="grid-template-columns:1fr 1fr;gap:12px;margin:0">
+              <div class="stat-card" style="background:var(--surface2)"><div class="s-label">Mobile</div><div class="s-num" style="font-size:22px">68%</div></div>
+              <div class="stat-card" style="background:var(--surface2)"><div class="s-label">Desktop</div><div class="s-num" style="font-size:22px">32%</div></div>
+              <div class="stat-card" style="background:var(--surface2)"><div class="s-label">Bounce Rate</div><div class="s-num" style="font-size:22px">38%</div></div>
+              <div class="stat-card" style="background:var(--surface2)"><div class="s-label">Return Visit</div><div class="s-num" style="font-size:22px">41%</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ POSTS ══ -->
+    <div class="section" id="tab-posts">
+      <div class="page-hdr">
+        <div><h1>Posts</h1><p id="posts-count-label"></p></div>
+        <button class="btn btn-red" onclick="gotoTab('new-post',null)">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New Post
+        </button>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+        <input class="form-control" placeholder="Search posts…" style="max-width:260px;margin-bottom:0" id="post-search" oninput="filterPosts()">
+        <select class="form-control" style="max-width:150px;margin-bottom:0" id="post-status-filter" onchange="filterPosts()">
+          <option value="">All Status</option><option>Published</option><option>Draft</option><option>Scheduled</option>
+        </select>
+        <select class="form-control" style="max-width:150px;margin-bottom:0" id="post-cat-filter" onchange="filterPosts()">
+          <option value="">All Categories</option><option>Politics</option><option>Business</option><option>Technology</option><option>Sports</option><option>Culture</option><option>Opinion</option>
+        </select>
+      </div>
+      <div class="card" style="margin:0">
+        <table class="data-table" id="posts-table"></table>
+      </div>
+    </div>
+
+    <!-- ══ WRITERS ══ -->
+    <div class="section" id="tab-writers">
+      <div class="page-hdr">
+        <div><h1>Writers</h1><p id="writers-count-label"></p></div>
+        <button class="btn btn-red" onclick="document.getElementById('add-writer-modal').classList.add('open')">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Writer
+        </button>
+      </div>
+      <div class="writers-grid" id="writers-grid"></div>
+    </div>
+
+    <!-- ══ NEW POST ══ -->
+    <div class="section" id="tab-new-post">
+      <div class="page-hdr"><div><h1>New Post</h1><p>Compose and publish a new article</p></div></div>
+      <div class="card">
+        <div class="card-body">
+          <div class="form-group"><label>Headline *</label><input class="form-control" id="np-title" placeholder="Enter a compelling headline…"></div>
+          <div class="form-grid">
+            <div class="form-group"><label>Category</label>
+              <select class="form-control" id="np-cat"><option>Politics</option><option>Business</option><option>Technology</option><option>Sports</option><option>Culture</option><option>Opinion</option><option>World</option></select>
+            </div>
+            <div class="form-group"><label>Author</label>
+              <select class="form-control" id="np-author"></select>
+            </div>
+          </div>
+          <div class="form-group"><label>Excerpt</label><textarea class="form-control" id="np-excerpt" style="min-height:80px" placeholder="Short summary shown in listings…"></textarea></div>
+          <div class="form-group"><label>Body</label><textarea class="form-control" id="np-body" style="min-height:260px" placeholder="Write your full article here…"></textarea></div>
+          <div class="form-grid">
+            <div class="form-group"><label>Featured Image URL</label><input class="form-control" id="np-img" placeholder="https://images.unsplash.com/…"></div>
+            <div class="form-group"><label>Tags</label><input class="form-control" id="np-tags" placeholder="kenya, politics, economy"></div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group"><label>Status</label>
+              <select class="form-control" id="np-status"><option>Published</option><option>Draft</option><option>Scheduled</option></select>
+            </div>
+            <div class="form-group"><label>Publish Date</label><input class="form-control" id="np-date" type="date"></div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-red" onclick="submitPost()">Publish Post</button>
+            <button class="btn btn-ghost" onclick="showToast('Saved as draft ✓')">Save Draft</button>
+            <button class="btn btn-ghost" onclick="clearPost()">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADS ══ -->
+    <div class="section" id="tab-ads">
+      <div class="page-hdr"><div><h1>Ad Management</h1><p>Monitor and configure ad network integrations</p></div></div>
+      <div class="stat-grid">
+        <div class="stat-card accent-red"><div class="s-label">Revenue (30d)</div><div class="s-num">Ksh 48.2K</div><div class="s-delta up">↑ 5.7%</div></div>
+        <div class="stat-card accent-teal"><div class="s-label">Overall CTR</div><div class="s-num">2.14%</div><div class="s-delta up">↑ 0.3pp</div></div>
+        <div class="stat-card accent-gold"><div class="s-label">Total Impressions</div><div class="s-num">284K</div><div class="s-delta up">↑ 11%</div></div>
+        <div class="stat-card accent-blue"><div class="s-label">eCPM</div><div class="s-num">Ksh 170</div><div class="s-delta up">↑ Ksh 8</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Active Ad Networks</h3><button class="btn btn-ghost" style="padding:6px 14px;font-size:12px" onclick="showToast('Ad slot added')">+ Add Network</button></div>
+        <table class="data-table ad-network-row" id="ads-table"></table>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Anti-Adblock & Publisher Settings</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group"><label>Google AdSense Publisher ID</label><input class="form-control" value="ca-pub-1234567890123456" placeholder="ca-pub-XXXXXXXXXXXXXXXXX"></div>
+            <div class="form-group"><label>Adsterra Zone ID</label><input class="form-control" value="5834921" placeholder="Zone ID"></div>
+            <div class="form-group"><label>Media.net Customer ID</label><input class="form-control" placeholder="Customer ID"></div>
+            <div class="form-group"><label>Ezoic Site ID</label><input class="form-control" placeholder="Site ID"></div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group"><label>Anti-Adblock Mode</label>
+              <select class="form-control">
+                <option selected>Soft wall (dismiss allowed)</option>
+                <option>Hard wall (block content)</option>
+                <option>Banner notification only</option>
+                <option>Disabled</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Ad Refresh Rate</label>
+              <select class="form-control"><option>30 seconds</option><option selected>60 seconds</option><option>90 seconds</option><option>Disabled</option></select>
+            </div>
+          </div>
+          <div class="form-actions"><button class="btn btn-red" onclick="showToast('Ad settings saved ✓')">Save Settings</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ REVENUE ══ -->
+    <div class="section" id="tab-revenue">
+      <div class="page-hdr"><div><h1>Revenue</h1><p>Breakdown of advertising and subscription income</p></div></div>
+      <div class="stat-grid">
+        <div class="stat-card accent-gold"><div class="s-label">Total Revenue (YTD)</div><div class="s-num">Ksh 284K</div><div class="s-delta up">↑ 18% YoY</div></div>
+        <div class="stat-card accent-red"><div class="s-label">Ad Revenue</div><div class="s-num">Ksh 241K</div><div class="s-delta up">↑ 14%</div></div>
+        <div class="stat-card accent-teal"><div class="s-label">Subscriptions</div><div class="s-num">Ksh 43K</div><div class="s-delta up">↑ 42%</div></div>
+        <div class="stat-card accent-blue"><div class="s-label">Paid Subscribers</div><div class="s-num">184</div><div class="s-delta up">↑ 31</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Monthly Ad Revenue — 2026</h3></div>
+        <div class="card-body">
+          <div class="bar-chart-wrap" id="rev-chart" style="height:140px"></div>
+          <div class="bc-days" id="rev-months" style="margin-top:8px"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>Revenue by Network (30d)</h3></div>
+        <div class="card-body" id="rev-network-bars" style="padding:8px 22px"></div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS ══ -->
+    <div class="section" id="tab-settings">
+      <div class="page-hdr"><div><h1>Settings</h1><p>Site configuration and preferences</p></div></div>
+      <div class="card">
+        <div class="card-head"><h3>General</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group"><label>Site Name</label><input class="form-control" value="Sound."></div>
+            <div class="form-group"><label>Tagline</label><input class="form-control" value="Independent journalism from East Africa"></div>
+            <div class="form-group"><label>Contact Email</label><input class="form-control" type="email" value="hello@sound.co.ke"></div>
+            <div class="form-group"><label>Time Zone</label>
+              <select class="form-control"><option selected>Africa/Nairobi (EAT, UTC+3)</option><option>UTC</option><option>Africa/Lagos</option></select>
+            </div>
+            <div class="form-group"><label>Default Language</label>
+              <select class="form-control"><option selected>English</option><option>Swahili</option><option>French</option></select>
+            </div>
+            <div class="form-group"><label>Posts per Page</label><input class="form-control" type="number" value="12"></div>
+          </div>
+          <div class="form-actions"><button class="btn btn-red" onclick="showToast('Settings saved ✓')">Save Changes</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>SEO & Social</h3></div>
+        <div class="card-body">
+          <div class="form-group"><label>Meta Description</label><textarea class="form-control" style="min-height:80px">Sound – Independent journalism from East Africa and beyond. Accurate, timely, and told with depth.</textarea></div>
+          <div class="form-grid">
+            <div class="form-group"><label>Twitter/X Handle</label><input class="form-control" value="@SoundNewsKE"></div>
+            <div class="form-group"><label>Facebook Page</label><input class="form-control" value="SoundNewsKenya"></div>
+          </div>
+          <div class="form-actions"><button class="btn btn-red" onclick="showToast('SEO settings saved ✓')">Save SEO Settings</button></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══ ADD WRITER MODAL ═══ -->
+<div class="modal-bg" id="add-writer-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Add New Writer</h3>
+      <button class="modal-close" onclick="document.getElementById('add-writer-modal').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Full Name *</label><input class="form-control" id="w-name" placeholder="e.g. Jane Wambui"></div>
+      <div class="form-group"><label>Email *</label><input class="form-control" id="w-email" type="email" placeholder="jane@sound.co.ke"></div>
+      <div class="form-grid">
+        <div class="form-group"><label>Beat / Section</label>
+          <select class="form-control" id="w-beat"><option>Politics</option><option>Business</option><option>Technology</option><option>Sports</option><option>Culture</option><option>Opinion</option></select>
+        </div>
+        <div class="form-group"><label>Role</label>
+          <select class="form-control" id="w-role"><option>Staff Writer</option><option>Senior Reporter</option><option>Contributor</option><option>Editor</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label>Bio</label><textarea class="form-control" id="w-bio" placeholder="Short bio…" style="min-height:80px"></textarea></div>
+      <div class="form-actions">
+        <button class="btn btn-red" onclick="addWriter()">Add Writer</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('add-writer-modal').classList.remove('open')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toast-msg"></span></div>
+
+<script>
+/* ─── DATA ─── */
+const IMAGES=['https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&q=60','https://images.unsplash.com/photo-1573164713988-8665fc963095?w=400&q=60','https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&q=60','https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400&q=60','https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=400&q=60','https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=400&q=60'];
+let articles=[
+  {id:1,title:"MPs debate sweeping anti-corruption bill amid public pressure",cat:"Politics",excerpt:"Lawmakers gather for emergency sitting to address the landmark bill.",author:"David Mwangi",date:"2025-05-29",read:"5 min",img:IMAGES[0],views:8420,status:"Published"},
+  {id:2,title:"Apple opens first East Africa store in Westlands, Nairobi",cat:"Technology",excerpt:"The 3,000 sq ft flagship store will employ 120 people.",author:"Priya Nair",date:"2025-05-29",read:"4 min",img:IMAGES[2],views:12100,status:"Published"},
+  {id:3,title:"Harambee Stars striker signs with Ligue 1 club",cat:"Sports",excerpt:"The 23-year-old forward moves to France in a deal worth €4.2M.",author:"Samuel Kimani",date:"2025-05-28",read:"3 min",img:IMAGES[3],views:21300,status:"Published"},
+  {id:4,title:"KCB posts record profits despite rising NPLs",cat:"Business",excerpt:"Kenya's largest bank posted a 22% jump in full-year net income.",author:"Amara Osei",date:"2025-05-28",read:"6 min",img:IMAGES[1],views:6800,status:"Published"},
+  {id:5,title:"East Africa's youngest governor tackles drought with tech",cat:"World",excerpt:"A 34-year-old governor deploys satellite data to manage droughts.",author:"David Mwangi",date:"2025-05-27",read:"7 min",img:IMAGES[4],views:4900,status:"Draft"},
+  {id:6,title:"Nairobi Film Festival breaks attendance record",cat:"Culture",excerpt:"Over 40,000 tickets sold across 8 venues, films from 28 countries.",author:"Priya Nair",date:"2025-05-26",read:"4 min",img:IMAGES[5],views:5300,status:"Scheduled"},
+];
+let writers=[
+  {id:1,name:"Amara Osei",email:"amara@sound.co.ke",beat:"Business",role:"Senior Reporter",posts:34,views:42800,status:"Active"},
+  {id:2,name:"David Mwangi",email:"david@sound.co.ke",beat:"Politics",role:"Staff Writer",posts:28,views:31200,status:"Active"},
+  {id:3,name:"Priya Nair",email:"priya@sound.co.ke",beat:"Technology",role:"Staff Writer",posts:21,views:28900,status:"Active"},
+  {id:4,name:"Samuel Kimani",email:"samuel@sound.co.ke",beat:"Sports",role:"Contributor",posts:19,views:24100,status:"Active"},
+];
+const AVATAR_COLORS=['#7b1d24','#1a4a3e','#1a2a6e','#5a2e0e'];
+const ACTIVITY=[
+  {icon:'file',label:'New post published',detail:'"Kenya sets bold target: 100% renewable electricity"',time:'2 min ago',color:'rgba(230,57,70,.15)',ic:'var(--red)'},
+  {icon:'user',label:'New writer added',detail:'Jane Wambui joined as Staff Writer',time:'14 min ago',color:'rgba(46,196,182,.15)',ic:'var(--teal)'},
+  {icon:'eye',label:'Article trending',detail:'"Harambee Stars striker" hit 20K views',time:'1 hour ago',color:'rgba(244,162,97,.15)',ic:'var(--gold)'},
+  {icon:'dollar',label:'Ad revenue milestone',detail:'AdSense crossed Ksh 10K for the month',time:'3 hours ago',color:'rgba(67,97,238,.2)',ic:'#7b9ff9'},
+  {icon:'share',label:'Viral share spike',detail:'Tech article shared 840 times on WhatsApp',time:'5 hours ago',color:'rgba(46,196,182,.15)',ic:'var(--teal)'},
+];
+
+/* ─── NAVIGATION ─── */
+const TITLES={overview:'Overview',insights:'Post Insights',posts:'Posts',writers:'Writers','new-post':'New Post',ads:'Ad Management',revenue:'Revenue',settings:'Settings'};
+function gotoTab(name,el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(el)el.classList.add('active');
+  document.getElementById('topbar-title').textContent=TITLES[name]||name;
+  if(name==='overview'){renderOverviewChart();renderDonut();renderActivity()}
+  if(name==='insights'){renderInsights()}
+  if(name==='posts'){renderPostsTable()}
+  if(name==='writers'){renderWritersGrid()}
+  if(name==='revenue'){renderRevenue()}
+  if(name==='new-post'){populateAuthorSelect()}
+}
+
+/* ─── OVERVIEW CHART ─── */
+function renderOverviewChart(){
+  const vals=[3200,4100,3800,5200,4700,6100,5800,7200,6800,7600,8100,7900,8400,9200];
+  const max=Math.max(...vals);
+  const days=['M','T','W','T','F','S','S','M','T','W','T','F','S','S'];
+  document.getElementById('ov-chart').innerHTML=vals.map((v,i)=>`<div class="bc-bar" style="height:${Math.round(v/max*100)}%" data-val="${v.toLocaleString()}"></div>`).join('');
+  document.getElementById('ov-days').innerHTML=days.map(d=>`<span>${d}</span>`).join('');
+}
+
+/* ─── DONUT CHART ─── */
+function renderDonut(){
+  const sources=[{name:'Organic',pct:42,col:'#e63946'},{name:'Direct',pct:28,col:'#2ec4b6'},{name:'Social',pct:18,col:'#f4a261'},{name:'Referral',pct:8,col:'#4361ee'},{name:'Email',pct:4,col:'#6b7280'}];
+  const R=52,cx=60,cy=60,circ=2*Math.PI*R;
+  let offset=0;
+  const segs=sources.map(s=>{
+    const len=circ*s.pct/100;
+    const seg=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${s.col}" stroke-width="14" stroke-dasharray="${len} ${circ-len}" stroke-dashoffset="${-offset}" style="transition:all .3s"/>`;
+    offset+=len;return seg;
+  }).join('');
+  const legend=sources.map(s=>`<div class="dl-row"><div class="dl-dot" style="background:${s.col}"></div><div class="dl-name">${s.name}</div><div class="dl-pct">${s.pct}%</div></div>`).join('');
+  document.getElementById('donut-wrap').innerHTML=`
+    <div class="donut" style="width:120px;height:120px">
+      <svg width="120" height="120" viewBox="0 0 120 120">${segs}</svg>
+      <div class="donut-center"><div class="dc-num">100%</div><div class="dc-label">Traffic</div></div>
+    </div>
+    <div class="donut-legend">${legend}</div>`;
+}
+
+/* ─── ACTIVITY ─── */
+function renderActivity(){
+  const icons={file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',dollar:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>'};
+  document.getElementById('activity-list').innerHTML=ACTIVITY.map(a=>`
+    <div class="activity-item">
+      <div class="ai-icon" style="background:${a.color};color:${a.ic}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${icons[a.icon]}</svg></div>
+      <div><div class="ai-text"><strong>${a.label}</strong> — ${a.detail}</div><div class="ai-meta">${a.time}</div></div>
+    </div>`).join('');
+}
+
+/* ─── INSIGHTS ─── */
+function renderInsights(){
+  const sorted=[...articles].sort((a,b)=>b.views-a.views).slice(0,5);
+  const max=sorted[0].views;
+  document.getElementById('top-articles-chart').innerHTML=sorted.map(a=>`
+    <div class="sparkline-row">
+      <div class="sp-name" style="width:auto;flex:1;min-width:0;padding-right:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px">${a.title}</div>
+      <div class="sp-bar" style="min-width:80px;max-width:260px"><div class="sp-fill" style="width:${Math.round(a.views/max*100)}%"></div></div>
+      <div class="sp-num">${(a.views/1000).toFixed(1)}K</div>
+    </div>`).join('');
+
+  const cats=[{n:'Sports',v:34},{n:'Technology',v:28},{n:'Politics',v:21},{n:'Business',v:18},{n:'Culture',v:12},{n:'Opinion',v:8}];
+  const cm=cats[0].v;
+  document.getElementById('cat-chart').innerHTML=cats.map(c=>`
+    <div class="sparkline-row">
+      <div style="width:90px;font-size:13px;flex-shrink:0">${c.n}</div>
+      <div class="sp-bar"><div class="sp-fill" style="width:${Math.round(c.v/cm*100)}%"></div></div>
+      <div class="sp-num">${c.v}%</div>
+    </div>`).join('');
+}
+
+/* ─── POSTS TABLE ─── */
+function renderPostsTable(data){
+  const list=data||articles;
+  document.getElementById('posts-count-label').textContent=`${list.length} posts total`;
+  document.getElementById('posts-table').innerHTML=`
+    <thead><tr><th>Title</th><th>Category</th><th>Author</th><th>Status</th><th>Views</th><th>Date</th><th></th></tr></thead>
+    <tbody>${list.map(a=>`<tr>
+      <td style="max-width:280px"><div style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px">${a.title}</div></td>
+      <td><span class="badge badge-blue">${a.cat}</span></td>
+      <td>${a.author}</td>
+      <td><span class="badge ${a.status==='Published'?'badge-green':a.status==='Draft'?'badge-yellow':'badge-blue'}"><span class="badge-dot"></span>${a.status}</span></td>
+      <td><span style="font-family:var(--font-mono);font-size:12px">${a.views.toLocaleString()}</span></td>
+      <td style="color:var(--muted);font-size:12px">${a.date}</td>
+      <td><button class="btn btn-ghost" style="padding:5px 12px;font-size:12px" onclick="showToast('Editing…')">Edit</button></td>
+    </tr>`).join('')}</tbody>`;
+}
+function filterPosts(){
+  const q=document.getElementById('post-search').value.toLowerCase();
+  const s=document.getElementById('post-status-filter').value;
+  const c=document.getElementById('post-cat-filter').value;
+  const filtered=articles.filter(a=>
+    (!q||a.title.toLowerCase().includes(q)||a.author.toLowerCase().includes(q))&&
+    (!s||a.status===s)&&(!c||a.cat===c));
+  renderPostsTable(filtered);
+}
+
+/* ─── WRITERS GRID ─── */
+function renderWritersGrid(){
+  document.getElementById('writers-count-label').textContent=`${writers.length} writers on the team`;
+  document.getElementById('writers-grid').innerHTML=writers.map((w,i)=>`
+    <div class="writer-card">
+      <div class="wc-actions">
+        <button class="wc-action-btn" title="Edit" onclick="showToast('Editing ${w.name}')"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="wc-action-btn" title="Remove" onclick="removeWriter(${w.id})"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+      </div>
+      <div class="wc-top">
+        <div class="wc-avatar" style="background:${AVATAR_COLORS[i%AVATAR_COLORS.length]};color:#fff">${w.name.split(' ').map(x=>x[0]).join('')}</div>
+        <div>
+          <div class="wc-name">${w.name}</div>
+          <div class="wc-role">${w.role} · <span style="color:var(--teal)">${w.beat}</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${w.email}</div>
+        </div>
+      </div>
+      <div class="wc-stats">
+        <div><div class="wcs-num">${w.posts}</div><div class="wcs-label">Posts</div></div>
+        <div><div class="wcs-num">${(w.views/1000).toFixed(1)}K</div><div class="wcs-label">Views</div></div>
+        <div><span class="badge ${w.status==='Active'?'badge-green':'badge-yellow'}" style="font-size:9px">${w.status}</span></div>
+      </div>
+    </div>`).join('');
+}
+function addWriter(){
+  const name=document.getElementById('w-name').value.trim();
+  const email=document.getElementById('w-email').value.trim();
+  if(!name||!email){showToast('Please fill required fields');return}
+  writers.push({id:Date.now(),name,email,beat:document.getElementById('w-beat').value,role:document.getElementById('w-role').value,posts:0,views:0,status:'Active'});
+  document.getElementById('add-writer-modal').classList.remove('open');
+  ['w-name','w-email','w-bio'].forEach(id=>document.getElementById(id).value='');
+  renderWritersGrid();
+  showToast(`${name} added as writer ✓`);
+}
+function removeWriter(id){
+  writers=writers.filter(w=>w.id!==id);
+  renderWritersGrid();
+  showToast('Writer removed');
+}
+
+/* ─── NEW POST ─── */
+function populateAuthorSelect(){
+  const sel=document.getElementById('np-author');
+  sel.innerHTML=writers.map(w=>`<option>${w.name}</option>`).join('');
+}
+function submitPost(){
+  const title=document.getElementById('np-title').value.trim();
+  if(!title){showToast('Please enter a headline');return}
+  articles.unshift({
+    id:Date.now(),title,
+    cat:document.getElementById('np-cat').value,
+    excerpt:document.getElementById('np-excerpt').value||'No excerpt.',
+    author:document.getElementById('np-author').value,
+    date:document.getElementById('np-date').value||new Date().toISOString().slice(0,10),
+    read:'1 min',
+    img:document.getElementById('np-img').value||IMAGES[0],
+    views:0,
+    status:document.getElementById('np-status').value,
+  });
+  clearPost();
+  showToast('Post published successfully ✓');
+}
+function clearPost(){
+  ['np-title','np-excerpt','np-body','np-img','np-tags','np-date'].forEach(id=>document.getElementById(id).value='');
+}
+
+/* ─── ADS TABLE ─── */
+function renderAdsTable(){
+  const networks=[
+    {name:'Google AdSense',slot:'Leaderboard 728×90',status:'Active',rev:18400,ctr:2.3,imp:84000},
+    {name:'Adsterra',slot:'Rectangle 300×250',status:'Active',rev:12800,ctr:1.9,imp:67000},
+    {name:'Media.net',slot:'Sidebar 160×600',status:'Pending',rev:8200,ctr:1.4,imp:51000},
+    {name:'Ezoic',slot:'Footer Banner',status:'Active',rev:6400,ctr:0.9,imp:52000},
+    {name:'Taboola',slot:'In-feed Native',status:'Paused',rev:2400,ctr:0.6,imp:30000},
+  ];
+  const maxRev=Math.max(...networks.map(n=>n.rev));
+  document.getElementById('ads-table').innerHTML=`
+    <thead><tr><th>Network</th><th>Ad Slot</th><th>Status</th><th>Revenue (30d)</th><th>CTR</th><th>Impressions</th><th></th></tr></thead>
+    <tbody>${networks.map(n=>`<tr>
+      <td>${n.name}</td>
+      <td style="color:var(--muted)">${n.slot}</td>
+      <td><span class="badge ${n.status==='Active'?'badge-green':n.status==='Pending'?'badge-yellow':'badge-red'}"><span class="badge-dot"></span>${n.status}</span></td>
+      <td>
+        <div style="font-family:var(--font-mono);font-size:13px">Ksh ${n.rev.toLocaleString()}</div>
+        <div class="revenue-bar"><div class="revenue-bar-fill" style="width:${Math.round(n.rev/maxRev*100)}%"></div></div>
+      </td>
+      <td style="font-family:var(--font-mono)">${n.ctr}%</td>
+      <td style="font-family:var(--font-mono);font-size:12px;color:var(--muted)">${n.imp.toLocaleString()}</td>
+      <td><button class="btn btn-ghost" style="padding:5px 12px;font-size:11px" onclick="showToast('Opening config for ${n.name}')">Configure</button></td>
+    </tr>`).join('')}</tbody>`;
+}
+
+/* ─── REVENUE ─── */
+function renderRevenue(){
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const vals=[28000,31000,27000,35000,42000,48000,0,0,0,0,0,0];
+  const max=Math.max(...vals.filter(v=>v>0));
+  document.getElementById('rev-chart').innerHTML=vals.map((v,i)=>`<div class="bc-bar" style="height:${v?Math.round(v/max*100):4}%;${!v?'opacity:.2':''}" data-val="${v?'Ksh '+v.toLocaleString():'N/A'}"></div>`).join('');
+  document.getElementById('rev-months').innerHTML=months.map(m=>`<span>${m}</span>`).join('');
+  const nets=[{n:'Google AdSense',v:48},{n:'Adsterra',v:29},{n:'Media.net',v:13},{n:'Ezoic',v:7},{n:'Taboola',v:3}];
+  document.getElementById('rev-network-bars').innerHTML=nets.map(n=>`
+    <div class="sparkline-row">
+      <div style="width:130px;font-size:13px;flex-shrink:0">${n.n}</div>
+      <div class="sp-bar"><div class="sp-fill" style="width:${n.v}%"></div></div>
+      <div class="sp-num">${n.v}%</div>
+    </div>`).join('');
+}
+
+/* ─── TOAST ─── */
+let _tt;
+function showToast(msg){
+  document.getElementById('toast-msg').textContent=msg;
+  const t=document.getElementById('toast');t.classList.add('show');
+  clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ─── MOBILE SIDEBAR ─── */
+document.getElementById('menu-toggle').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+document.getElementById('add-writer-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.target.classList.remove('open')});
+
+/* ─── INIT ─── */
+renderOverviewChart();renderDonut();renderActivity();renderAdsTable();
+populateAuthorSelect();
+</script>
+</body>
+</html>
